@@ -1,0 +1,43 @@
+# Nginx container for reverse proxy
+docker run -d -p 80:80 \
+    --name nginx-proxy \
+    -v /var/run/docker.sock:/tmp/docker.sock:ro \
+    jwilder/nginx-proxy
+
+# The 1st MariaDB container for the 1st WordPress
+docker run -d -p 3301:3306 \
+    --name db1 \
+    -e VIRTUAL_PORT=3301 \
+    -e MYSQL_ROOT_PASSWORD=admin \
+    -e MYSQL_DATABASE=wordpress \
+    -e MYSQL_USER=wordpress \
+    -e MYSQL_PASSWORD=wordpress \
+    mariadb:10.3
+
+# The 1st WordPress container
+docker run -d \
+    --name wp1 \
+    -e VIRTUAL_HOST=1.example.com \
+    -e WORDPRESS_DB_HOST=192.168.0.175:3301 \
+    -e WORDPRESS_DB_USER=wordpress \
+    -e WORDPRESS_DB_PASSWORD=wordpress \
+    wordpress:4.8.1
+
+# The 2nd MariaDB container for the 2nd WordPress
+docker run -d -p 3302:3306 \
+    --name db2 \
+    -e VIRTUAL_PORT=3302 \
+    -e MYSQL_ROOT_PASSWORD=admin \
+    -e MYSQL_DATABASE=wordpress \
+    -e MYSQL_USER=wordpress \
+    -e MYSQL_PASSWORD=wordpress \
+    mariadb:10.3
+
+# The 2nd WordPress container
+docker run -d \
+    --name wp2 \
+    -e VIRTUAL_HOST=2.example.com \
+    -e WORDPRESS_DB_HOST=192.168.0.175:3302 \
+    -e WORDPRESS_DB_USER=wordpress \
+    -e WORDPRESS_DB_PASSWORD=wordpress \
+    wordpress:4.8.1
